@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<!--
+Site Template || mp - martin@pistrich.at
+Site Template based on AdminLTE from Github
+-->
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="Auswertungstool by mp" />
+    <meta name="author" content="mp - martin@pistrich.at - 2020" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+
+    <title>Auswertungstool | mp</title>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/dist/css/adminlte.min.css" />
+
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="/dist/images/favicon.png"
+    />
+  </head>
+
+  <body class="hold-transition sidebar-mini layout-navbar-fixed layout-fixed">
+    <div class="wrapper">
+      <!-- Navbar -->
+      <nav class="main-header navbar navbar-expand navbar-dark">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#"
+              ><i class="fas fa-bars"></i
+            ></a>
+          </li>
+          <li class="nav-item d-none d-sm-inline-block">
+            <a href="/index.html" class="nav-link">Startseite</a>
+          </li>
+          <li class="nav-item d-none d-sm-inline-block">
+            <a href="/sites/help.html" class="nav-link">Hilfe</a>
+          </li>
+        </ul>
+
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
+          <!-- Notifications Dropdown Menu -->
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#">
+              <i class="fas fa-info-circle"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+              <span class="dropdown-header">Projekt Informationen</span>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item">
+                <i class="fas fa-sitemap mr-2"></i>Projekt
+                <span class="float-right text-muted text-sm" id="pi"></span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item">
+                <i class="fas fa-users mr-2"></i>Kunden
+                <span class="float-right text-muted text-sm" id="ki">0</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item">
+                <i class="fas fa-braille mr-2"></i>Measurements
+                <span class="float-right text-muted text-sm" id="di">0</span>
+              </a>
+              <div class="dropdown-divider"></div>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              data-widget="control-sidebar"
+              data-slide="true"
+              href="#"
+              ><i class="fas fa-th-large"></i
+            ></a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.navbar -->
+
+      <!-- Main Sidebar Container -->
+      <aside class="main-sidebar sidebar-dark-yellow elevation-4">
+        <!-- Brand Logo -->
+        <a href="https://www.mywebsite.org" target="_blank" class="brand-link">
+          <img
+            src="/dist/images/Logo_MP.png"
+            alt="Logo mp"
+            class="brand-image"
+          />
+          <span class="brand-text font-weight-light">Auswertungstool</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <!-- Sidebar user panel (optional) -->
+          <!-- Database Connection -->
+          <div class="user-panel pb-3 mt-3 mb-3 d-flex">
+            <div class="image">
+              <span style="font-size: 22px; color: #ffc107" id="dbIcon">
+                <i class="fas fa-database"></i>
+              </span>
+            </div>
+            <div class="info">
+              <a
+                class="d-block"
+                href="#"
+                onclick="checkDB();event.preventDefault();"
+                id="dbText"
+                >Datenbank CHECK</a
+              >
+            </div>
+          </div>
+          <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+              <span style="font-size: 22px; color: #ffc107" id="sIcon">
+                <i class="fas fa-server"></i>
+              </span>
+            </div>
+            <div class="info">
+              <a
+                class="d-block"
+                href="#"
+                onclick="checkDB();event.preventDefault();"
+                id="sText"
+                >Backend CHECK</a
+              >
+            </div>
+          </div>
+
+          <!-- Sidebar Menu -->
+          <nav class="mt-2">
+            <ul
+              class="nav nav-pills nav-sidebar flex-column"
+              data-widget="treeview"
+              role="menu"
+              data-accordion="false"
+            >
+              <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+
+              <li class="nav-item">
+                <a href="/index.html" class="nav-link">
+                  <i class="nav-icon fas fa-sitemap"></i>
+                  <p id="loadedProjectName">--</p>
+                </a>
+              </li>
+
+              <li class="nav-header">AUSWERTUNGEN</li>
+              <li class="nav-item">
+                <a href="/sites/mapView.html" class="nav-link">
+                  <i class="nav-icon fas fa-map-marked-alt"></i>
+                  <p>Kartenansicht</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/sites/dashboardView.html" class="nav-link">
+                  <i class="nav-icon fas fa-chart-bar"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+
+              <li class="nav-header">ADMINISTRATION</li>
+              <li class="nav-item">
+                <a href="/sites/adminProjects.html" class="nav-link">
+                  <i class="nav-icon fas fa-upload"></i>
+                  <p>1 - Daten Import</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/sites/verifyLatLon.html" class="nav-link">
+                  <i class="nav-icon fas fa-map-signs"></i>
+                  <p>2 - Koordinaten zuweisen</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/sites/apiSettings.html" class="nav-link">
+                  <i class="nav-icon fas fa-paper-plane"></i>
+                  <p>API Einstellungen</p>
+                </a>
+              </li>
+
+              <li class="nav-header">DIVERSES</li>
+              <li class="nav-item">
+                <a href="/sites/verifyJSONsHighCharts.html" class="nav-link">
+                  <i class="nav-icon fas fa-clipboard-check"></i>
+                  <p>JSON prüfen</p>
+                </a>
+              </li>
+              <li id="vawt" class="nav-header fixed-bottom">Version AWT</li>
+            </ul>
+          </nav>
+          <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+      </aside>
+
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1 class="m-0 text-dark">Dashboard</h1>
+                <!--Tite of the Content Site-->
+              </div>
+              <!-- /.col -->
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item">
+                    <a href="/index.html">Startseite</a>
+                  </li>
+                </ol>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.container-fluid -->
+        </div>
+        <!-- /.content-header -->
+
+        <!-- Main content -->
+        <div class="content">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="card card-warning card-outline">
+                  <div class="card-header">
+                    <h3 class="card-title">
+                      <i class="fas fa-map-marked-alt mr-1"></i> TestCard
+                    </h3>
+                  </div>
+                  <div class="card-body">
+
+                    <button type="button" class="btn btn-primary btn-block" id="getData">
+                      Daten holen
+                    </button>
+
+
+
+
+
+                  </div>
+                </div>
+
+                <!-- /.card -->
+              </div>
+
+              <!-- /.col-md-6 -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+      </div>
+      <!-- /.content-wrapper -->
+
+      <!-- Control Sidebar -->
+      <aside class="control-sidebar control-sidebar-dark">
+        <!-- Control sidebar content goes here -->
+        <div class="p-3">
+          <h5>Noch keine funktion</h5>
+          <p>Sidebar content</p>
+        </div>
+      </aside>
+      <!-- /.control-sidebar -->
+
+      <!-- Main Footer -->
+      <footer class="main-footer text-sm">
+        <!-- To the right -->
+        <div class="float-right d-none d-sm-inline">Auswertungstool</div>
+        <!-- Default to the left -->
+        <strong
+          >Copyright &copy; 2020
+          <a href="https://www.mywebsite.org">mp</a>.</strong
+        >
+      </footer>
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- REQUIRED SCRIPTS -->
+
+    <!-- jQuery -->
+    <script src="/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="/dist/js/adminlte.min.js"></script>
+    <!-- MPi -->
+    <script src="/dist/js/dashboardView.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+In this folder later all HTML/CSS/JS files for the websever are coming
