@@ -1,7 +1,7 @@
 var customerData;
 var table;
 var tableArray =  new Array();
-var makersLayer;
+var markersLayer;
 var mymap;
 var changes = false;
 
@@ -86,6 +86,227 @@ function main() {
         });
     }
     getAPIsettings();
+}
+
+var hhIcon = new L.Icon({
+    //own marker icons
+    iconUrl: "/dist/images/marker/marker_hh.png",
+    shadowUrl: "/dist/images/marker/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+});
+
+var abnehmerIcon = new L.Icon({
+    //own marker icons
+    iconUrl: "/dist/images/marker/marker_ab.png",
+    shadowUrl: "/dist/images/marker/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+});
+
+var customOptions = {
+    className: "custom",
+};
+
+
+function setAMarker(markerArray) {
+    const title = markerArray.title; //value searched
+    var loc = markerArray.loc; //position found
+    if (markerArray.id > 1000) {
+        var marker = new L.Marker(new L.latLng(loc), {
+            title: title,
+            icon: hhIcon,
+        }).on("click", function (e) {
+            markedMarker = e.latlng;
+        });
+    } else {
+        var marker = new L.Marker(new L.latLng(loc), {
+            title: title,
+            icon: abnehmerIcon,
+        }).on("click", function (e) {
+            //console.warn(e.latlng.lat);
+            markedMarker = e.latlng;
+        });
+    }
+    //var marker = new L.Marker(new L.latLng(loc), { title: title , icon: abnehmerIcon});
+    marker.bindPopup(
+        "<div class='text-center'><h6>" +
+        title +
+        //"</h6><hr class='style1'>" +
+        "</h6>" +
+        "<b>ID: </b> " +
+        markerArray.id +
+        "<br><b>Adresse: </b> " +
+        markerArray.ad1 +
+        " " +
+        markerArray.ad2 +
+        "<br><b>PLZ/Stadt: </b> " +
+        markerArray.plz +
+        " - " +
+        markerArray.town +
+        "<br><b>Land: </b> " +
+        markerArray.country +
+        "<br><br><b>Latitude: </b>" +
+        loc[0] +
+        "<br><b>Longitude: </b>" +
+        loc[1],
+        customOptions
+    );
+    markersLayer.addLayer(marker);
+}
+
+function updateCounter() {
+    var hm = tableArray.filter((x) => x[7] !== "").length;
+    $("#counter").text(
+        hm + " von " + tableArray.length + " Einträgen zugewiesen"
+    );
+    if (hm === tableArray.length) {
+        $("#counter").text(
+            hm +
+            " von " +
+            tableArray.length +
+            " Einträgen zugewiesen - VOLLSTÄNDIG - Bitte Koordinaten in die Datenbank schreiben"
+        );
+    }
+}
+
+function setTable(dataSet) {
+    if (table !== undefined) {
+        //reset the table if a new dataset will be loaded
+        table.clear();
+        table.destroy();
+    }
+
+    updateCounter();
+
+    //set marker on map if already something in lat/lon
+    dataSet.forEach((element) => {
+        if (element[7] !== "") {
+            //something is there
+            var makeArray = {
+                loc: [element[7], element[8]],
+                title: element[1],
+                id: element[0],
+                ad1: element[2],
+                ad2: element[3],
+                plz: element[4],
+                town: element[5],
+                country: element[6],
+            };
+            setAMarker(makeArray);
+        }
+    });
+
+    table = $("#customerTable").DataTable({
+        data: dataSet,
+        columns: [
+            { title: "ID" },
+            { title: "Name" },
+            { title: "Adresse 1" },
+            { title: "Adresse 2" },
+            { title: "Stadt" },
+            { title: "Postleitzahl" },
+            { title: "Land" },
+            { title: "Latitude" },
+            { title: "Longitude" },
+        ],
+        language: {
+            url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/German.json",
+        },
+        lengthMenu: [5, 25, 50, 100],
+        pageLength: 5,
+        scrollX: true,
+        scrollY: "185px",
+        scrollCollapse: false,
+        paging: false,
+        info: false,
+    });
+
+    $("#customerTable tbody")
+        .off("click")
+        .on("click", "tr", function () {
+            //first turn off the event (click) to prevent multiple clicks/events on a row after rebuild the table
+            if ($(this).hasClass("selected")) {
+                $(this).removeClass("selected");
+            } else {
+                table.$("tr.selected").removeClass("selected");
+                $(this).addClass("selected");
+            }
+            console.warn("clicked a row", table.row(this).data());
+            markedRow = table.row(this).data();
+
+            //get to the point when clicked in the table
+            if (table.row(this).data()[7] !== "") {
+                mymap.flyTo([table.row(this).data()[7], table.row(this).data()[8]], 17);
+            }
+
+            //open the clicked popup from this marker/abnehmer
+            //var latlon = new L.LatLng(table.row(this).data()[7], table.row(this).data()[8]);
+            var flat = table.row(this).data()[7];
+            var flng = table.row(this).data()[8];
+
+            markersLayer.eachLayer(function (layer) {
+                //layer.openPopup();
+                if (layer._latlng.lat === flat) {
+                    layer.openPopup();
+                }
+            });
+        });
+
+    //set zoom of map when loaded
+    var bounds1 = markersLayer.getBounds();
+    mymap.flyToBounds(bounds1, { padding: [20, 20] });
+}
+
+function getCustomers() {
+    $.ajax({
+        url: "http://localhost:7000/api/getCustomers",
+        dataType: "json",
+        success: function (jsonData) {
+            //projectname
+            //console.log(jsonData);
+            //$("#pName").html("<b>Projekt:</b> " + jsonData.pn[0].last);
+            customerData = jsonData.cd;
+            boilerhouseData = jsonData.bd;
+            tableArray = new Array();
+            customerData.forEach((element) => {
+                tableArray.push([
+                    element.ID,
+                    element.name,
+                    element.address1,
+                    element.address2,
+                    element.town,
+                    element.plz,
+                    element.country,
+                    element.lat,
+                    element.lon,
+                ]);
+            });
+
+            boilerhouseData.forEach((element) => {
+                tableArray.push([
+                    parseInt(element.ID) + 1000,
+                    element.name,
+                    element.address1,
+                    element.address2,
+                    element.town,
+                    element.plz,
+                    element.country,
+                    element.lat,
+                    element.lon,
+                ]);
+            });
+
+            setTable(tableArray);
+        },
+        error: function (jsonData) {
+            console.warn(jsonData);
+        },
+    });
 }
 
 //check the connection to the Influx DB
