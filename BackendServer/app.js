@@ -64,7 +64,7 @@ app.set("view engine", "ejs");
  */
 
 
-//start informations 
+//start informations
 console.log("AWT - node.js Server is starting ...")
 
 /* Middlewares */
@@ -72,7 +72,7 @@ console.log("AWT - node.js Server is starting ...")
 //app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(log("dev"));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "/public")));
 app.use(bodyParser.json({limit: "350mb"}));
 app.use(bodyParser.urlencoded({
   limit: "350mb",

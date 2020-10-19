@@ -17,9 +17,10 @@ module.exports = (app, router) => {
   router.get("/getInfo", influx.getInfo);
   router.post("/ull", influx.updateDBll);
   router.get("/getAllData", influx.getAllData);
+  // router.get("/getMergeData", influx.getMergeData);
 
   router.get("/getApiSettings", apis.getApiSettings);
   router.post("/writeApiSettings", apis.writeApiSettings);
-  
+
   app.use("/api", router);
 };

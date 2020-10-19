@@ -1,0 +1,33 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          47.13498225,
+          13.7825
+        ]
+      },
+      "properties": {
+        "GPSID": "",
+        "DateStart": "2015-06-23",
+        "DateClosed": "2016-01-23",
+        "ValueType": {
+          "primVL": 19.07,
+          "primRL": 27.81,
+          "leistung": 57,
+          "durchfluss": 189,
+          "aussenTemp": 46.42,
+          "sekVLSoll": 24.74,
+          "sekVLIst": 27.76,
+          "t1": 38301,
+          "t2": 16420,
+          "t3": 46750,
+          "energie": 31305
+        }
+      }
+    }
+  ]
+}

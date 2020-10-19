@@ -56,7 +56,6 @@ let color4 = "#FCC133";
 */
 
 var colors = Highcharts.getOptions().colors;
-
 var chart;
 
 //Global Functions
@@ -118,6 +117,7 @@ function testF() {
     },
   });
 
+  console.log(primVL);
   let dataSeries = [
     {
       yAxis: 1,
@@ -280,6 +280,8 @@ function testF() {
       series: dataSeries,
     });
   }
+  console.log(dataSeries);
+
   if (wichType === "Heizhaus") {
     chart = Highcharts.chart("container", {
       boost: {
@@ -340,7 +342,7 @@ function testF() {
       series: dataSeries,
     });
   }
-
+  console.log(data1)
   //console.timeEnd('line');
   $("#chartDivLoad").remove();
   $("#chartTitle").html('<i class="fas fa-chart-line mr-1"></i> Chart Anzeige');
@@ -786,6 +788,7 @@ function main() {
 
         let data1Temp;
 
+
         if (data1.product === "AWT - Abnehmerdaten") {
           wichType = "Abnehmer";
           data1Temp = data1.customerData.historyData;
@@ -910,6 +913,7 @@ function main() {
         statusMsgParse.file1row = primVL.length;
         statusMsgParse.file1time = (new Date().getTime() - start1) / 1000;
         data1Ready = true;
+
 
         //reverse the array to go from start to end
         primVL.reverse();
