@@ -85,7 +85,7 @@ let initMap = (slider_data_format, history_value_type) => {
 
                     slideMap = L.map("timeSlider", {
                         zoom: 10,
-                        center:[47.13498225, 14.310545998145553],
+                        center: [47.13498225, 14.310545998145553],
                         timeDimension: true,
                         timeDimensionControl: true,
                     });
@@ -116,7 +116,6 @@ let initMap = (slider_data_format, history_value_type) => {
                                         "<br><b>primVL:  </b>" + feature.properties.primVL +
                                         "<br><b>primRL:  </b>" + feature.properties.primRL +
                                         "<br><b>leistung:  </b>" + feature.properties.leistung +
-                                        "<br><b>durchluss:  </b>" + feature.properties.durchluss +
                                         "<br><b>durchluss:  </b>" + feature.properties.durchluss +
                                         "<br><b>aussenTemp:  </b>" + feature.properties.aussenTemp
                                     );
@@ -153,15 +152,17 @@ let initMap = (slider_data_format, history_value_type) => {
                                     break;
                             }
                         },
+                    });//.addTo(slideMap);
 
-                    });
+                    /*****************************************/
+                    /*****************************************/
 
                     sliderControl = L.control.sliderControl({
                         position: "bottomleft",
                         layer: testlayer,
                         range: false,
-                        timeAttribute: "DateStart",
-
+                        // timeAttribute: "DateStart",
+                        showAllOnStart: false,
                     });
 
                     // L.timeDimension.layer.geoJson(slider_data_format).addTo(slideMap);
@@ -251,7 +252,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": element.customerId,
-                                    "DateStart": (new Date(start_time_timestamp)).toString(),
+                                    "time": (new Date(start_time_timestamp)).toString(),
                                     "DateClosed": (new Date(end_time_timestamp)).toString(),
                                     "primVL": element.primVL,
                                     "primRL": element.primRL,
@@ -271,7 +272,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": (parseInt(element.customerId) + 1000).toString(),
-                                    "DateStart": start_time_timestamp.toString(),
+                                    "time": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
                                     "sekVLSoll": element.sekVLSoll,
                                     "sekVLIst": element.sekVLIst,
@@ -289,7 +290,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": element.customerId,
-                                    "DateStart": start_time_timestamp.toString(),
+                                    "time": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
                                     "t1": element.t1,
                                     "t2": element.t2,
@@ -307,7 +308,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": element.customerId,
-                                    "DateStart": start_time_timestamp.toString(),
+                                    "time": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
                                     "energie": element.energie,
                                     "name": customerData[i].name
@@ -343,7 +344,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": (element.ID + 1000),
-                                    "DateStart": start_time_timestamp.toString(),
+                                    "time": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
                                     "primVL": element.primVL,
                                     "primRL": element.primRL,
@@ -363,7 +364,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": element.customerId,
-                                    "DateStart": start_time_timestamp.toString(),
+                                    "time": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
                                     "sekVLSoll": element.sekVLSoll,
                                     "sekVLIst": element.sekVLIst,
@@ -381,7 +382,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": element.customerId,
-                                    "DateStart": start_time_timestamp.toString(),
+                                    "time": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
                                     "t1": element.t1,
                                     "t2": element.t2,
@@ -399,7 +400,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": element.customerId,
-                                    "DateStart": start_time_timestamp.toString(),
+                                    "time": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
                                     "energie": element.energie,
                                     "name": boilerData[j].name
@@ -411,7 +412,6 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
             }
         })
     }
-console.log(slider_data_format);
     if (slider_data_format.features.length > 0) {
         $("#timeSlider").css('display', 'block');
         initMap(slider_data_format, history_value_type);
