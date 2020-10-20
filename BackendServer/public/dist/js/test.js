@@ -3,7 +3,7 @@ var slider_data_format = {
     "type": "FeatureCollection",
     "features": []
 };
-
+var markersLayer;
 var chart_customer_data_format = {"historyData": {}};
 var chart_boiler_data_format = {"historyData": {}};
 
@@ -16,7 +16,7 @@ var customOptions = {
 var hhIcon = new L.Icon({
     //own marker icons
     iconUrl: "/dist/images/marker/marker_hh.png",
-    shadowUrl: "/dist/images/marker/marker-shadow.png",
+    // shadowUrl: "/dist/images/marker/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -26,7 +26,7 @@ var hhIcon = new L.Icon({
 var abnehmerIcon = new L.Icon({
     //own marker icons
     iconUrl: "/dist/images/marker/marker_ab.png",
-    shadowUrl: "/dist/images/marker/marker-shadow.png",
+    // shadowUrl: "/dist/images/marker/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -64,32 +64,52 @@ var chart;
 //*****************************************
 var slideMap = null;
 let initMap = (slider_data_format, history_value_type) => {
-
+    var custom_marker;
 
     function getAPIsettings() {
         if (slideMap !== null && slideMap !== undefined) {
-            console.log(slideMap);
             slideMap.remove();
         }
-        // console.log(slider_data_format.features.length);
         $.ajax({
             url: "http://localhost:7000/api/getApiSettings",
             dataType: "json",
             success: function (jsonData) {
                 tilesAPI = jsonData.KartenTiles;
                 nominatimAPI = jsonData.Nominatim;
+
                 if (slider_data_format.features.length > 0) {
-                    slideMap = L.map("timeSlider").setView([47.13498225, 14.310545998145553], 5);
+                    //sort date time
+                    slider_data_format.features.sort(function (a, b) {
+                        return (a.properties.DateStart > b.properties.DateStart);
+                    });
+
+                    slideMap = L.map("timeSlider", {
+                        zoom: 10,
+                        center:[47.13498225, 14.310545998145553],
+                        timeDimension: true,
+                        timeDimensionControl: true,
+                    });
                     L.tileLayer(tilesAPI + "/{z}/{x}/{y}.png", {
                         attribution:
                             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     }).addTo(slideMap);
                     //Create a marker layer (in the example done via a GeoJSON FeatureCollection)
+
+
+                    var sliderControl = null;
+
                     var testlayer = L.geoJson(slider_data_format, {
+                        pointToLayer: function (feature, latlng) {
+                            if (parseInt(feature.properties.GPSID) > 1000) {
+                                return new L.Marker(latlng, {icon: hhIcon});
+                            } else {
+                                return new L.Marker(latlng, {icon: abnehmerIcon});
+                            }
+                        },
                         onEachFeature: function (feature, layer) {
                             switch (parseInt(history_value_type)) {
                                 case 1:
-                                    layer.bindPopup("<div class='text-left'><h6>Koordinaten an dieser Position</h6> <b>Latitude:  </b>" +
+                                    layer.bindPopup("<div class='text-left'><h6>" + feature.properties.name + "</h6> <b>Latitude:  </b>" +
                                         feature.geometry.coordinates[1] +
                                         "<br><b>Longitude:  </b>" +
                                         feature.geometry.coordinates[0] +
@@ -97,11 +117,12 @@ let initMap = (slider_data_format, history_value_type) => {
                                         "<br><b>primRL:  </b>" + feature.properties.primRL +
                                         "<br><b>leistung:  </b>" + feature.properties.leistung +
                                         "<br><b>durchluss:  </b>" + feature.properties.durchluss +
+                                        "<br><b>durchluss:  </b>" + feature.properties.durchluss +
                                         "<br><b>aussenTemp:  </b>" + feature.properties.aussenTemp
                                     );
                                     break;
                                 case 2:
-                                    layer.bindPopup("<div class='text-center'><h6>Koordinaten an dieser Position</h6> <b>Latitude:  </b>" +
+                                    layer.bindPopup("<div class='text-center'><h6>" + feature.properties.name + "</h6> <b>Latitude:  </b>" +
                                         feature.geometry.coordinates[1] +
                                         "<br><b>Longitude:  </b>" +
                                         feature.geometry.coordinates[0] +
@@ -109,9 +130,10 @@ let initMap = (slider_data_format, history_value_type) => {
                                         "<br><b>sekVLIst:  </b>" + feature.properties.sekVLIst +
                                         "<br><b>aussenTemp:  </b>" + feature.properties.aussenTemp
                                     );
+
                                     break;
                                 case 3:
-                                    layer.bindPopup("<div class='text-center'><h6>Koordinaten an dieser Position</h6> <b>Latitude:  </b>" +
+                                    layer.bindPopup("<div class='text-center'><h6>" + feature.properties.name + "</h6> <b>Latitude:  </b>" +
                                         feature.geometry.coordinates[1] +
                                         "<br><b>Longitude:  </b>" +
                                         feature.geometry.coordinates[0] +
@@ -119,60 +141,34 @@ let initMap = (slider_data_format, history_value_type) => {
                                         "<br><b>t2:  </b>" + feature.properties.t2 +
                                         "<br><b>t3:  </b>" + feature.properties.t3
                                     );
+
                                     break;
                                 case 4:
-                                    layer.bindPopup("<div class='text-center'><h6>Koordinaten an dieser Position</h6> <b>Latitude:  </b>" +
+                                    layer.bindPopup("<div class='text-center'><h6>" + feature.properties.name + "</h6> <b>Latitude:  </b>" +
                                         feature.geometry.coordinates[1] +
                                         "<br><b>Longitude:  </b>" +
                                         feature.geometry.coordinates[0] +
-                                        "<br><b>primVL:  </b>" + feature.properties.primVL
+                                        "<br><b>energie:  </b>" + feature.properties.energie
                                     );
                                     break;
                             }
                         },
+
                     });
 
-                    L.geoJSON(slider_data_format, {
-                        pointToLayer: function (feature, latlng) {
-                            return new L.Marker(latlng, {icon: hhIcon});
-                        },
-                    }).addTo(slideMap);
-
-                    var sliderControl = L.control.sliderControl({
+                    sliderControl = L.control.sliderControl({
                         position: "bottomleft",
                         layer: testlayer,
-                        range: true,
-                        timeAttribute: "DateStart"
+                        range: false,
+                        timeAttribute: "DateStart",
+
                     });
 
+                    // L.timeDimension.layer.geoJson(slider_data_format).addTo(slideMap);
                     //Make sure to add the slider to the map ;-)
                     slideMap.addControl(sliderControl);
                     //And initialize the slider
                     sliderControl.startSlider();
-
-
-                    //    When click map, display current Position.
-                    var popup = L.popup(customOptions);
-
-                    var markedlatlon = {lat: "", lon: ""};
-
-                    function onMapClick(e) {
-                        //console.warn("clicked on map ", e);
-                        markedlatlon.lat = e.latlng.lat;
-                        markedlatlon.lon = e.latlng.lng;
-                        popup
-                            .setLatLng(e.latlng)
-                            .setContent(
-                                "<div class='text-center'><h6>Koordinaten an dieser Position</h6> <b>Latitude:  </b>" +
-                                e.latlng.lat +
-                                "<br><b>Longitude:  </b>" +
-                                e.latlng.lng +
-                                "<button type='button' id='zoomto' class='btn-xs btn-warning btn-block'>Diese Position bei markierten Abn. setzen</button>"
-                            )
-                            .openOn(slideMap);
-                    }
-
-                    slideMap.on("click", onMapClick);
                 }
             },
             error: function (e) {
@@ -180,7 +176,6 @@ let initMap = (slider_data_format, history_value_type) => {
             }
         });
     }
-
 
     getAPIsettings(slider_data_format);
 
@@ -193,7 +188,6 @@ function getAllhistory() {
         url: "http://localhost:7000/api/getAllData",
         dataType: "json",
         success: function (jsonData) {
-            // console.log("getAllhistory: ", jsonData);
             customerHistory = jsonData.customer;
             boilerHistory = jsonData.boiler;
         },
@@ -211,7 +205,6 @@ function getMetaData() {
         url: "http://localhost:7000/api/getCustomers",
         dataType: "json",
         success: function (jsonData) {
-            // console.log("getMetaData: ", jsonData);
             customerData = jsonData.cd;
             //projectname
             boilerData = jsonData.bd;
@@ -243,18 +236,10 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                 var start_time = element.time;
                 var start_time_timestamp = new Date(start_time);
                 var end_time_timestamp = new Date(start_time);
-                end_time_timestamp.setMinutes(start_time_timestamp.getMinutes() + 15);
+                end_time_timestamp.setMinutes(start_time_timestamp.getMinutes() + 14);
+                end_time_timestamp.setSeconds(start_time_timestamp.getSeconds() + 59);
                 end_time_timestamp.setTime(end_time_timestamp.valueOf() + end_time_timestamp.getTimezoneOffset() * 60 * 1000);
                 start_time_timestamp.setTime(start_time_timestamp.valueOf() + start_time_timestamp.getTimezoneOffset() * 60 * 1000);
-                // var end_time_year = (new Date(end_time_timestamp.setTime(end_time_timestamp.valueOf() + end_time_timestamp.getTimezoneOffset()*60*1000))).getFullYear();
-                // var end_time_month = "0" + (new Date(end_time_timestamp.setTime(end_time_timestamp.valueOf() + end_time_timestamp.getTimezoneOffset()*60*1000))).getMonth();
-                // var end_time_date = "0" + (new Date(end_time_timestamp.setTime(end_time_timestamp.valueOf() + end_time_timestamp.getTimezoneOffset()*60*1000))).getDate();
-                // var end_time_hour = "0" + (new Date(end_time_timestamp.setTime(end_time_timestamp.valueOf() + end_time_timestamp.getTimezoneOffset()*60*1000))).getHours();
-                // var end_time_minute = "0" + (new Date(end_time_timestamp)).getMinutes();
-                // var end_time_second = "0" + (new Date(end_time_timestamp)).getSeconds();
-                // var end_time_millisecond = "0" + (new Date(end_time_timestamp)).getMilliseconds();
-                // var formatted_end_time = end_time_year + "-" + end_time_month.substr(-2) + "-" + end_time_date.substr(-2) + "T" + end_time_hour.substr(-2) + ":" + end_time_minute.substr(-2) + ":" + end_time_second.substr(-2) + ".000Z";
-                // console.log(formatted_end_time);
                 if (start_time_set_value < start_time_timestamp && end_time_set_value > end_time_timestamp) {
                     switch (parseInt(history_value_type)) {
                         case 1:
@@ -266,13 +251,14 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                 },
                                 "properties": {
                                     "GPSID": element.customerId,
-                                    "DateStart": start_time_timestamp.toString(),
-                                    "DateClosed": end_time_timestamp.toString(),
+                                    "DateStart": (new Date(start_time_timestamp)).toString(),
+                                    "DateClosed": (new Date(end_time_timestamp)).toString(),
                                     "primVL": element.primVL,
                                     "primRL": element.primRL,
                                     "leistung": element.leistung,
                                     "durchluss": element.durchluss,
                                     "aussenTemp": element.aussenTemp,
+                                    "name": customerData[i].name
                                 }
                             });
                             break;
@@ -290,6 +276,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                     "sekVLSoll": element.sekVLSoll,
                                     "sekVLIst": element.sekVLIst,
                                     "aussenTemp": element.aussenTemp,
+                                    "name": customerData[i].name
                                 }
                             });
                             break;
@@ -307,6 +294,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                     "t1": element.t1,
                                     "t2": element.t2,
                                     "t3": element.t3,
+                                    "name": customerData[i].name
                                 }
                             });
                             break;
@@ -321,7 +309,8 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                     "GPSID": element.customerId,
                                     "DateStart": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
-                                    "energie": element.energie
+                                    "energie": element.energie,
+                                    "name": customerData[i].name
                                 }
                             });
                             break;
@@ -338,18 +327,11 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                 var start_time = element.time;
                 var start_time_timestamp = new Date(start_time);
                 var end_time_timestamp = new Date(start_time);
-                end_time_timestamp.setMinutes(start_time_timestamp.getMinutes() + 15);
+                end_time_timestamp.setMinutes(start_time_timestamp.getMinutes() + 14);
+                end_time_timestamp.setSeconds(start_time_timestamp.getSeconds() + 59);
                 end_time_timestamp.setTime(end_time_timestamp.valueOf() + end_time_timestamp.getTimezoneOffset() * 60 * 1000);
                 start_time_timestamp.setTime(start_time_timestamp.valueOf() + start_time_timestamp.getTimezoneOffset() * 60 * 1000);
-                // var end_time_year = (new Date(end_time_timestamp)).getFullYear();
-                // var end_time_month = "0" + (new Date(end_time_timestamp)).getMonth();
-                // var end_time_date = "0" + (new Date(end_time_timestamp)).getDate();
-                // var end_time_hour = "0" + (new Date(end_time_timestamp)).getHours();
-                // var end_time_minute = "0" + (new Date(end_time_timestamp)).getMinutes();
-                // var end_time_second = "0" + (new Date(end_time_timestamp)).getSeconds();
-                // var end_time_millisecond = "0" + (new Date(end_time_timestamp)).getMilliseconds();
-                // var formatted_end_time = end_time_year + "-" + end_time_month.substr(-2) + "-" + end_time_date.substr(-2) + "T" + end_time_hour.substr(-2) + ":" + end_time_minute.substr(-2) + ":" + end_time_second.substr(-2) + ".000Z";
-                // console.log(formatted_end_time);
+
                 if (start_time_set_value < start_time_timestamp && end_time_set_value > end_time_timestamp) {
                     switch (parseInt(history_value_type)) {
                         case 1:
@@ -368,6 +350,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                     "leistung": element.leistung,
                                     "durchluss": element.durchluss,
                                     "aussenTemp": element.aussenTemp,
+                                    "name": boilerData[j].name
                                 }
                             });
                             break;
@@ -385,6 +368,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                     "sekVLSoll": element.sekVLSoll,
                                     "sekVLIst": element.sekVLIst,
                                     "aussenTemp": element.aussenTemp,
+                                    "name": boilerData[j].name
                                 }
                             });
                             break;
@@ -402,6 +386,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                     "t1": element.t1,
                                     "t2": element.t2,
                                     "t3": element.t3,
+                                    "name": boilerData[j].name
                                 }
                             });
                             break;
@@ -416,7 +401,8 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
                                     "GPSID": element.customerId,
                                     "DateStart": start_time_timestamp.toString(),
                                     "DateClosed": end_time_timestamp.toString(),
-                                    "energie": element.energie
+                                    "energie": element.energie,
+                                    "name": boilerData[j].name
                                 }
                             });
                             break;
@@ -425,7 +411,7 @@ function dataformat_fuc(history_value_type, start_time_set_value, end_time_set_v
             }
         })
     }
-
+console.log(slider_data_format);
     if (slider_data_format.features.length > 0) {
         $("#timeSlider").css('display', 'block');
         initMap(slider_data_format, history_value_type);
@@ -676,13 +662,6 @@ function testF(customer_type, history_value_type) {
                         title: {
                             text: "Temperaturen & diverse",
                         },
-                        /*
-                    labels: {
-                      formatter: function() {
-                          return this.value + ' °C';
-                      }
-                  }
-                  */
                     },
                 ],
 
@@ -693,7 +672,7 @@ function testF(customer_type, history_value_type) {
         // if (customerData.name !== "" && customerData.name !==null) {
     }
 
-    console.log(dataSeries);
+
     for (var j = 0; j < boiler_marker_number; j++) {
         if (boilerData[j].name === customer_type) {
             chart = Highcharts.chart("chart_container", {
@@ -741,13 +720,7 @@ function testF(customer_type, history_value_type) {
                         title: {
                             text: "Temperaturen & diverse",
                         },
-                        /*
-                    labels: {
-                      formatter: function() {
-                          return this.value + ' °C';
-                      }
-                  }
-                  */
+
                     },
                 ],
 
@@ -757,7 +730,7 @@ function testF(customer_type, history_value_type) {
         }
 
     }
-
+    // console.log(dataSeries);
     //console.timeEnd('line');
     $("#chartDivLoad").remove();
     $("#chartTitle").html('<i class="fas fa-chart-line mr-1"></i> Chart Anzeige');
@@ -914,7 +887,6 @@ function chart_data_format(history_value_type, start_time_set_value, end_time_se
                 }
             });
 
-            //reverse the array to go from start to end
         }
     }
 
@@ -1033,17 +1005,18 @@ function chart_data_format(history_value_type, start_time_set_value, end_time_se
 
         }
     }
-    primVL.reverse();
-    primRL.reverse();
-    sekVLSoll.reverse();
-    sekVLIst.reverse();
-    aussenTemp.reverse();
-    durchfluss.reverse();
-    leistung.reverse();
-    energie.reverse();
-    t1.reverse();
-    t2.reverse();
-    t3.reverse();
+
+    primVL.sort();
+    primRL.sort();
+    sekVLSoll.sort();
+    sekVLIst.sort();
+    aussenTemp.sort();
+    durchfluss.sort();
+    leistung.sort();
+    energie.sort();
+    t1.sort();
+    t2.sort();
+    t3.sort();
     statusMsgParse.file1row = primVL.length;
 
     statusMsgParse.file1time = (new Date().getTime() - start1) / 1000;
@@ -1166,7 +1139,7 @@ $(document).ready(() => {
 
     //====== generate Chart ======
     $("#generate_chart").on("click", function () {
-        $("#chart_container").css("display", "block");
+        // $("#chart_container").css("display", "block");
         var start_time = $("#dtp_chart_input1").val();
         var end_time = $("#dtp_chart_input2").val();
         var history_value_type = $(".history_chart_value_type").val();
